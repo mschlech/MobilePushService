@@ -15,6 +15,7 @@ import akka.util.Timeout
 import akka.actor.Props
 import akka.camel.Consumer
 import akka.camel.CamelMessage
+import akka.actor.Actor
 
 /**
  * @author marcus
@@ -66,7 +67,7 @@ object PushNotifierApp extends App {
         .when(header("apnType").isEqualTo("apple")).process(new Processor {
 
           def process(exchange: Exchange) {
-            println("inside = " + exchange.getIn().getHeaders())
+            println("inside apple Pushservice= " + exchange.getIn().getHeaders())
             ApplePush(exchange.getIn().getHeader("apnType").toString, "an ApplePush")
             println("APPLEPUSH " + ApplePush.toString)
           }
@@ -85,7 +86,7 @@ object PushNotifierApp extends App {
   })
   camelContext.addComponent("activemqApple", ActiveMQComponent.activeMQComponent("vm://localhost?broker.persistent=false"))
   camelContext.addComponent("activemqAndroid", ActiveMQComponent.activeMQComponent("vm://localhost?broker.persistent=false"))
-  
+
   camelContext.setTracing(true)
   /**
    * the actor subsystem
@@ -97,9 +98,20 @@ object PushNotifierApp extends App {
   //  }
   //  println("the future gets back " + futureActivationTask)
 
-  val applePushConsumer = pushServiceActor.actorOf(Props(new ApplePushConsumer("activemq:queue:activemqApple")), "applepushconsumer")
+  val internalActorRef = pushServiceActor.actorOf(Props(new InternalActor), "internalActor")
+  val applePushConsumer = pushServiceActor.actorOf(Props(new ApplePushConsumer("activemq:queue:activemqApple", internalActorRef)), "applepushconsumer")
   val androidPushConsumer = pushServiceActor.actorOf(Props(new AndroidPushConsumer("activemq:queue:activemqAndroid")), "androidpushconsumer")
 
-  
   //pushServiceActor.awaitTermination()
+}
+
+class InternalActor extends Actor {
+  def receive = {
+    case msg: CamelMessage =>
+      msg.mapBody { b: String =>
+        // do some extremely intelligent processing
+        b.map { c => if (c.isWhitespace) '_' else c }
+        println("internal Actor " + b)
+      }
+  }
 }
