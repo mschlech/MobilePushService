@@ -4,8 +4,9 @@ import akka.actor.actorRef2Scala
 import akka.camel.Ack
 import akka.camel.CamelMessage
 import akka.camel.Consumer
+import akka.actor.ActorRef
 
-class ApplePushConsumer(appleQueue: String) extends Consumer {
+class ApplePushConsumer(appleQueue: String, next : ActorRef) extends Consumer {
 
   println(" ApplePushConsumer =[" + appleQueue + "]" )
   def endpointUri = appleQueue
