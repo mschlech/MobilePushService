@@ -1,0 +1,15 @@
+A sample for the Typesafe Stack (http://typesafe.com/stack).
+
+Akka 2.0 sample project using Scala and SBT.
+
+To run and test it use SBT invoke: 'sbt run'
+ "com.typesafe.akka" % "akka-actor"      % "2.0.3",
+        "com.typesafe.akka" % "akka-actor-migration" % "2.0.3"
+        "com.typesafe.akka" % "akka-testkit"    % "2.0.3"  % "test",
+        "org.apache.camel" % "camel-core" % "2.9.0" % "compile",
+        "org.apache.camel" % "camel-jetty" % "2.9.0" % "compile",
+        "org.apache.camel" % "camel-spring" % "2.9.0" % "compile",
+        "org.apache.camel" % "camel-stream" % "2.9.0" % "compile",
+        "org.slf4j" % "log4j-over-slf4j" % "1.6.1" % "runtime",
+        "junit"             % "junit"           % "4.5"             % "test",
+        "org.scalatest"     % "scalatest_2.9.0" % "1.6.1"           % "test")
