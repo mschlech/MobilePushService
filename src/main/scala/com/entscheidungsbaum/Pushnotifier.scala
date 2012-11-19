@@ -1,26 +1,42 @@
 package com.entscheidungsbaum
 
 import akka.actor.ActorRef
-import akka.actor.actorRef2Scala
 import akka.actor.ActorSystem
+import akka.actor.actorRef2Scala
 import akka.actor.Props
-import com.sun.org.apache.bcel.internal.generic.PUSH
+import akka.camel.CamelExtension
+import akka.util.Timeout
+import org.apache.activemq.camel.component.ActiveMQComponent
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
-class PushnotifierAppWith //extends Bootable {
-{
-  val pushServiceActor = ActorSystem("pushnotifier")
+object PushnotifierAppWith extends App {
 
-  def startup = {
-    //    pushServiceActor.actorOf(Props(new InternalActor), "internalActor")
+  implicit val timeoutDuration = 10 seconds
+  implicit val timeout = Timeout(timeoutDuration)
 
- //   pushServiceActor.actorOf(Props(new ApplePushConsumer("activemq:queue:activemqApple", internalActorRef)), "applepushconsumer") ! Start
+  val system = ActorSystem("MobilePush")
+  implicit val ec = system.dispatcher
 
-  //  pushServiceActor.actorOf(Props(new AndroidPushConsumer("activemq:queue:activemqAndroid")), "androidpushconsumer") ! Start
+  //
+  val pushDispatcher = system.actorOf(Props(new PushProducer("direct:pushService")))
 
-    //    pushServiceActor.actorOf(Props(new QProducer("activemq:queue:activemqApple")))
-  }
+  val httpMobilePushConsumer = system.actorOf(Props(new HttpMobilePushConsumer(system, applePushConsumer)), "httpMobilePushConsumer")
 
-  def shutdown = {
-    pushServiceActor.shutdown
-  }
+  val applePushConsumer = system.actorOf(Props(new ApplePushConsumer("acitvemq:queue:apple")))
+
+  val androidPushConsumer = system.actorOf(Props(new AndroidPushConsumer("acitvemq:queue:apple")))
+  
+  CamelExtension(system).context.addRoutes(new MobilePushRouteBuilder)
+
+  val camel = CamelExtension(system)
+
+  val camelContext = camel.context
+
+  camelContext.addComponent("applePush", ActiveMQComponent.activeMQComponent("vm://localhost?broker.persistent=false"))
+  camelContext.addComponent("androidPush", ActiveMQComponent.activeMQComponent("vm://localhost?broker.persistent=false"))
+  camelContext.setTracing(true)
+  Await.ready(camel.activationFutureFor(applePushConsumer), 10 seconds)
+  system.awaitTermination()
+
 }

@@ -1,17 +1,12 @@
 package com.entscheidungsbaum
 
 import akka.actor.Actor
-import org.apache.camel.Producer
-import akka.camel.CamelMessage
+import akka.camel.Producer
 
+class PushProducer(uri: String) extends Actor with Producer {
 
-
-class PushProducer extends Actor { // with Producer {
-
-  def endpointUri = ""
+  println("producer activated ")
+  def endpointUri = uri
+  override def oneway: Boolean = true
   
- def receive = {
-    
-    case msg: CamelMessage => println(msg)
-  }
 }

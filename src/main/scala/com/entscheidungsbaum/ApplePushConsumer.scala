@@ -1,28 +1,35 @@
 package com.entscheidungsbaum
 
-import org.apache.camel.Exchange
-import org.apache.camel.Processor
-import org.apache.camel.builder.RouteBuilder
-
+import org.apache.camel.Message
 import akka.actor.ActorRef
 import akka.actor.actorRef2Scala
+import akka.camel.Consumer
+import akka.camel.CamelMessage
+import akka.actor.Actor
 case class PushType
-class ApplePushConsumer(appleQueue: String) extends RouteBuilder {
+class ApplePushConsumer(activeMq:String) extends Actor{
 
-  println(" ApplePushConsumer =[" + appleQueue + "]")
-  def endpointUri = "file:///Users/marcus/tmp/apple"
+  println(" ApplePushConsumer ")
+ // def endpointUri = activeMq
 
   //  override def activationTimeout = 10 seconds
   //  override def replyTimeout = 30 seconds
   //  override def autoack = false
 
-  def configure {
-    from("activemq:queue:activemqApple").process(new Processor() {
-      def process(exchange: Exchange) {
-        println("inside the exchange process => " + exchange.getContext())
-      }
-    }).to("file:///Users/marcus/tmp/apple")
+  def receive = {
+
+    case msg: CamelMessage => {
+
+      println("applePush [%s] " format msg.toString())
+      //  sender ! Ack
+    }
+    
+    case _ => { println("no request initiated !!!!") }
 
   }
 
+  def processDispatcher(dispatchCamelRequest: PushType) = dispatchCamelRequest match {
+    case s: PushType => sender ! s
+    case _ => println("nothing")
+  }
 }

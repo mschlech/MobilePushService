@@ -6,31 +6,25 @@ import akka.camel.CamelMessage
 import akka.camel.Consumer
 import akka.camel.Producer
 import akka.actor.Actor
+import org.apache.camel.Exchange
 
-class AndroidPushConsumer(androidQueue: String) extends Actor with Producer { 
-  println(" AndroidPushConsumer =[" + androidQueue + "]" )
-  def endpointUri = "file:///Users/marcus/tmp"
+class AndroidPushConsumer(uri: String) extends Actor {
+  println(" AndroidPushConsumer")
 
-//  override def activationTimeout = 10 seconds
-//  override def replyTimeout = 30 seconds
-//  override def autoack = false
+  //  override def activationTimeout = 10 seconds
+  //  override def replyTimeout = 30 seconds
+  //  override def autoack = false
 
-  override def transformOutgoingMessage(msg:Any) = msg match {
+  def receive = {
 
     case msg: CamelMessage => {
 
-      println("androidPush [%s] ") //format msg.bodyAs[String])
-      sender ! Ack
+      println("androidPush [%s] " format msg.toString())
+      //  sender ! Ack
     }
-    case _ => {println("no request initiated ")}
+
+    case _ => { println("no request initiated !!!!") }
 
   }
-
-  def processDispatcher(dispatchCamelRequest: PushType) = dispatchCamelRequest match {
-    case s: PushType => sender ! s
-    case _ => println("nothing")
-  }
-
-  
 
 }
