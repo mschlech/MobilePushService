@@ -1,20 +1,19 @@
 package com.entscheidungsbaum
 
 import org.apache.camel.Message
-import akka.actor.ActorRef
-import akka.actor.actorRef2Scala
+import akka.actor.{ActorSystem, ActorRef, actorRef2Scala, Actor}
 import akka.camel.Consumer
 import akka.camel.CamelMessage
-import akka.actor.Actor
 case class PushType
-class ApplePushConsumer(activeMq:String) extends Actor{
+class ApplePushConsumer(actorSystem: ActorSystem , activeMq: String) extends Consumer {
 
   println(" ApplePushConsumer ")
- // def endpointUri = activeMq
+  def endpointUri = activeMq
 
   //  override def activationTimeout = 10 seconds
   //  override def replyTimeout = 30 seconds
   //  override def autoack = false
+
 
   def receive = {
 
@@ -23,7 +22,7 @@ class ApplePushConsumer(activeMq:String) extends Actor{
       println("applePush [%s] " format msg.toString())
       //  sender ! Ack
     }
-    
+
     case _ => { println("no request initiated !!!!") }
 
   }

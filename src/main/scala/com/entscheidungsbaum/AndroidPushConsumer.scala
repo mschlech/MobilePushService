@@ -1,14 +1,13 @@
 package com.entscheidungsbaum
 
-import akka.actor.actorRef2Scala
+import akka.actor.{ActorSystem, ActorRef, actorRef2Scala, Actor}
 import akka.camel.Ack
 import akka.camel.CamelMessage
 import akka.camel.Consumer
 import akka.camel.Producer
-import akka.actor.Actor
 import org.apache.camel.Exchange
 
-class AndroidPushConsumer(uri: String) extends Actor {
+class AndroidPushConsumer(actorSystem: ActorSystem,uri: String) extends Actor {
   println(" AndroidPushConsumer")
 
   //  override def activationTimeout = 10 seconds

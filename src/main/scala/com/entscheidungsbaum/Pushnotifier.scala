@@ -18,25 +18,36 @@ object PushnotifierAppWith extends App {
   val system = ActorSystem("MobilePush")
   implicit val ec = system.dispatcher
 
-  //
-  val pushDispatcher = system.actorOf(Props(new PushProducer("direct:pushService")))
 
-  val httpMobilePushConsumer = system.actorOf(Props(new HttpMobilePushConsumer(system, applePushConsumer)), "httpMobilePushConsumer")
+  val pushDispatcherProducer = system.actorOf(Props[PushProducer])
+  println("pushDispatcherProducer -- " + pushDispatcherProducer)
 
-  val applePushConsumer = system.actorOf(Props(new ApplePushConsumer("acitvemq:queue:apple")))
+  val httpMobilePushConsumer = system.actorOf(Props(new HttpMobilePushConsumer(system, pushDispatcherProducer)), "httpMobilePushConsumer")
+  println("httpMobilePushConsumer -- " + httpMobilePushConsumer)
 
-  val androidPushConsumer = system.actorOf(Props(new AndroidPushConsumer("acitvemq:queue:apple")))
-  
+  val applePushConsumer = system.actorOf(Props(new ApplePushConsumer(system,"activemq:queue:apple")), "applePush")
+  println("applePushConsumer -- " + applePushConsumer)
+
+  val androidPushConsumer = system.actorOf(Props(new AndroidPushConsumer(system,"activemq:queue:android")), "androidPush")
+  println("applePushConsumer -- " + androidPushConsumer)
+
   CamelExtension(system).context.addRoutes(new MobilePushRouteBuilder)
-
   val camel = CamelExtension(system)
+
+  val appleActivationFuture = camel.activationFutureFor(applePushConsumer)
+  val androidActivationFuture = camel.activationFutureFor(androidPushConsumer)
 
   val camelContext = camel.context
 
   camelContext.addComponent("applePush", ActiveMQComponent.activeMQComponent("vm://localhost?broker.persistent=false"))
   camelContext.addComponent("androidPush", ActiveMQComponent.activeMQComponent("vm://localhost?broker.persistent=false"))
   camelContext.setTracing(true)
-  Await.ready(camel.activationFutureFor(applePushConsumer), 10 seconds)
-  system.awaitTermination()
+
+
+//
+//  Await.ready(camel.activationFutureFor(applePushConsumer), 30 seconds)
+//  Await.ready(camel.activationFutureFor(androidPushConsumer), 30 seconds)
+
+  //system.awaitTermination()
 
 }

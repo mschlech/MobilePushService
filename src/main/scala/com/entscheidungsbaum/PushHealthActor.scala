@@ -2,8 +2,9 @@ package com.entscheidungsbaum
 
 import akka.camel.CamelMessage
 import akka.camel.Consumer
+import akka.actor.Actor
 
-class PushHealthActor extends Consumer {
+class PushHealthActor extends Actor {
 
   def endpointUri = "jetty:http://localhost:1112/health"
     

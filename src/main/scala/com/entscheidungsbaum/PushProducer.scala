@@ -2,11 +2,14 @@ package com.entscheidungsbaum
 
 import akka.actor.Actor
 import akka.camel.Producer
+import akka.actor.ActorSystem
+import akka.actor.Props
 
-class PushProducer(uri: String) extends Actor with Producer {
+class PushProducer extends Actor with Producer {
 
-  println("producer activated ")
-  def endpointUri = uri
+  println("producer activated " + this.camelContext.getName())
+
+  def endpointUri = "direct:pushService"
+
   override def oneway: Boolean = true
-  
 }

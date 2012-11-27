@@ -17,27 +17,30 @@ import akka.camel.Producer
 import akka.util.Timeout
 import akka.actor.Props
 import scala.concurrent.duration._
+import akka.util
 
 /**
  * @author marcus
  *
  */
-class HttpMobilePushConsumer(pushServiceActor: ActorSystem, dispatcher: ActorRef) extends Actor with Consumer {
+class HttpMobilePushConsumer(pushServiceActor: ActorSystem, producer:ActorRef) extends Actor with Consumer {
 
   def endpointUri = "jetty:http://localhost:11112/pushnotifier"
-  implicit val timeout = Timeout(30 seconds)
+  implicit val timeout = util.Timeout(10 seconds)
 
   override val camel = CamelExtension(pushServiceActor)
 
   override val camelContext = camel.context
 
   def receive = {
-    case msg: CamelMessage => {
+   case msg: CamelMessage =>
       val apnType = msg.getHeaders.get("apnType")
-      println("camel Message Headers =" + msg.getHeaders.toString + " \n " + " for Dispatcher " + dispatcher)
+      println("CAMEL Message Headers =" + msg.getHeaders.toString + " \n " + " apnType = " + apnType)
+
+
       val name = "Hello you requested a %s" format apnType
-      dispatcher.forward(msg)
-      sender forward msg.toString
-    }
+
+     sender ! msg.toString
+
   }
 }
