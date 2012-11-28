@@ -1,7 +1,5 @@
-/**
- *
- */
 package com.entscheidungsbaum
+
 
 import org.apache.activemq.camel.component.ActiveMQComponent
 import org.apache.camel.Exchange
@@ -19,28 +17,33 @@ import akka.actor.Props
 import scala.concurrent.duration._
 import akka.util
 
+
+
 /**
  * @author marcus
  *
  */
-class HttpMobilePushConsumer(pushServiceActor: ActorSystem, producer:ActorRef) extends Actor with Consumer {
+class HttpMobilePushConsumer(pushServiceActor: ActorSystem, producer: ActorRef) extends Actor with Consumer {
 
   def endpointUri = "jetty:http://localhost:11112/pushnotifier"
-  implicit val timeout = util.Timeout(10 seconds)
+
+  implicit val timeoutDuration = 10 seconds
+
+  implicit val timeout = util.Timeout(timeoutDuration)
 
   override val camel = CamelExtension(pushServiceActor)
 
   override val camelContext = camel.context
 
   def receive = {
-   case msg: CamelMessage =>
+    case msg: CamelMessage =>
       val apnType = msg.getHeaders.get("apnType")
       println("CAMEL Message Headers =" + msg.getHeaders.toString + " \n " + " apnType = " + apnType)
+    case msg: CamelMessage => producer.forward(msg)
 
+//    val name = "Hello you requested a %s" format apnType
 
-      val name = "Hello you requested a %s" format apnType
-
-     sender ! msg.toString
+//    sender ! name
 
   }
 }

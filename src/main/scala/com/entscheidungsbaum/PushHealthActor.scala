@@ -1,7 +1,6 @@
 package com.entscheidungsbaum
 
 import akka.camel.CamelMessage
-import akka.camel.Consumer
 import akka.actor.Actor
 
 class PushHealthActor extends Actor {

@@ -31,13 +31,15 @@ object PushnotifierAppWith extends App {
   val androidPushConsumer = system.actorOf(Props(new AndroidPushConsumer(system,"activemq:queue:android")), "androidPush")
   println("applePushConsumer -- " + androidPushConsumer)
 
-  CamelExtension(system).context.addRoutes(new MobilePushRouteBuilder)
+
   val camel = CamelExtension(system)
 
   val appleActivationFuture = camel.activationFutureFor(applePushConsumer)
   val androidActivationFuture = camel.activationFutureFor(androidPushConsumer)
 
   val camelContext = camel.context
+
+  //val mobilePushRouteBuilderConsumer = system.actorOf(Props(new MobilePushRouteBuilder(camelContext)),"routeBuilder")
 
   camelContext.addComponent("applePush", ActiveMQComponent.activeMQComponent("vm://localhost?broker.persistent=false"))
   camelContext.addComponent("androidPush", ActiveMQComponent.activeMQComponent("vm://localhost?broker.persistent=false"))
@@ -49,5 +51,6 @@ object PushnotifierAppWith extends App {
 //  Await.ready(camel.activationFutureFor(androidPushConsumer), 30 seconds)
 
   //system.awaitTermination()
+  CamelExtension(system).context.addRoutes(new MobilePushRouteBuilder)
 
 }

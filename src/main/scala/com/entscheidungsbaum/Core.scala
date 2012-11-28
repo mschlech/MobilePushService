@@ -1,15 +1,15 @@
-package com.entscheidungsbaum.com.entscheidungsbaum.core
+package com.entscheidungsbaum
 
-import akka.actor.{ActorSystem, Props}
+import akka.actor.{Props, ActorSystem}
 import akka.util.Timeout
-import concurrent.Await
 
 /**
- * com.entscheidungsbaum.com.entscheidungsbaum.core
+ * com.entscheidungsbaum
  * marcus
  * Author Marcus Schlechter
- * 11/26/12
+ * 11/28/12
  */
+
 
 case class Start()
 
@@ -37,4 +37,3 @@ trait Core {
 
  // Await.ready(application ? Start(), timeout.duration)
 }
-
