@@ -18,12 +18,19 @@ object PushnotifierAppWith extends App {
   val system = ActorSystem("MobilePush")
   implicit val ec = system.dispatcher
 
+  val camel = CamelExtension(system)
+
+  val camelContext = camel.context
+  CamelExtension(system).context.addRoutes(new MobilePushRouteBuilder)
+
+  camelContext.addComponent("activemq", ActiveMQComponent.activeMQComponent("vm://localhost?broker.persistent=false"))
 
   val pushDispatcherProducer = system.actorOf(Props[PushProducer])
   println("pushDispatcherProducer -- " + pushDispatcherProducer)
 
   val httpMobilePushConsumer = system.actorOf(Props(new HttpMobilePushConsumer(system, pushDispatcherProducer)), "httpMobilePushConsumer")
   println("httpMobilePushConsumer -- " + httpMobilePushConsumer)
+
 
   val applePushConsumer = system.actorOf(Props(new ApplePushConsumer(system,"activemq:queue:apple")), "applePush")
   println("applePushConsumer -- " + applePushConsumer)
@@ -32,25 +39,24 @@ object PushnotifierAppWith extends App {
   println("applePushConsumer -- " + androidPushConsumer)
 
 
-  val camel = CamelExtension(system)
 
   val appleActivationFuture = camel.activationFutureFor(applePushConsumer)
   val androidActivationFuture = camel.activationFutureFor(androidPushConsumer)
 
-  val camelContext = camel.context
+
+
+
 
   //val mobilePushRouteBuilderConsumer = system.actorOf(Props(new MobilePushRouteBuilder(camelContext)),"routeBuilder")
 
-  camelContext.addComponent("applePush", ActiveMQComponent.activeMQComponent("vm://localhost?broker.persistent=false"))
-  camelContext.addComponent("androidPush", ActiveMQComponent.activeMQComponent("vm://localhost?broker.persistent=false"))
   camelContext.setTracing(true)
 
 
 //
-//  Await.ready(camel.activationFutureFor(applePushConsumer), 30 seconds)
-//  Await.ready(camel.activationFutureFor(androidPushConsumer), 30 seconds)
-
+  Await.ready(camel.activationFutureFor(applePushConsumer), 20 seconds)
+  Await.ready(camel.activationFutureFor(androidPushConsumer), 20 seconds)
+  appleActivationFuture.foreach(println)
+  println("AppleActivationFuture => " + appleActivationFuture.foreach(println))
   //system.awaitTermination()
-  CamelExtension(system).context.addRoutes(new MobilePushRouteBuilder)
 
 }

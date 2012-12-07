@@ -38,8 +38,9 @@ class HttpMobilePushConsumer(pushServiceActor: ActorSystem, producer: ActorRef) 
   def receive = {
     case msg: CamelMessage =>
       val apnType = msg.getHeaders.get("apnType")
-      println("CAMEL Message Headers =" + msg.getHeaders.toString + " \n " + " apnType = " + apnType)
-    case msg: CamelMessage => producer.forward(msg)
+      println("CAMEL Message Headers =" + msg.getHeaders.toString + " \n " + " apnType = " + apnType + " dedicated for " +
+        "actor ref producer " + producer.path.elements.foreach(println))
+    case msg: CamelMessage => producer ! msg
 
 //    val name = "Hello you requested a %s" format apnType
 
